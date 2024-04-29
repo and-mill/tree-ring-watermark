@@ -9,3 +9,7 @@ python run_tree_ring_watermark.py --run_name color_jitter --w_channel 3 --w_patt
 
 ### fid
 python run_tree_ring_watermark_fid.py --run_name fid_run --w_channel 3 --w_pattern ring --start 0 --end 5000 --with_tracking --run_no_w
+
+
+# and-mill tests
+python run_tree_ring_watermark.py --run_name no_attack --w_channel 3 --w_pattern ring --start 0 --end 1 --num_images  --with_tracking --reference_model ViT-g-14 --reference_model_pretrain laion2b_s12b_b42k
