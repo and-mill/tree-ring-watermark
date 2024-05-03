@@ -136,3 +136,6 @@ tmp*.png
 wandb/
 fid_outputs/
 *.pt
+
+# and-mill
+OUT

@@ -193,7 +193,11 @@ def get_watermarking_pattern(pipe, args, device, shape=None):
     return gt_patch
 
 
-def inject_watermark(init_latents_w, watermarking_mask, gt_patch, args):
+def inject_watermark(init_latents_w, watermarking_mask, gt_patch, args,
+                     # and-mill ------------------------------------------------------------------------------
+                     return_fft=False
+                     # and-mill ------------------------------------------------------------------------------
+                     ):
     init_latents_w_fft = torch.fft.fftshift(torch.fft.fft2(init_latents_w), dim=(-1, -2))
     if args.w_injection == 'complex':
         init_latents_w_fft[watermarking_mask] = gt_patch[watermarking_mask].clone()
@@ -205,7 +209,10 @@ def inject_watermark(init_latents_w, watermarking_mask, gt_patch, args):
 
     init_latents_w = torch.fft.ifft2(torch.fft.ifftshift(init_latents_w_fft, dim=(-1, -2))).real
 
-    return init_latents_w
+    if return_fft:
+        return init_latents_w, init_latents_w_fft
+    else:
+        return init_latents_w
 
 
 def eval_watermark(reversed_latents_no_w, reversed_latents_w, watermarking_mask, gt_patch, args):
