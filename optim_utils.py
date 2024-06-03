@@ -50,11 +50,17 @@ def image_distortion(img1, img2, seed, args):
         img1 = transforms.RandomRotation((args.r_degree, args.r_degree))(img1)
         img2 = transforms.RandomRotation((args.r_degree, args.r_degree))(img2)
 
+    # TODO: This can cause race condition I think. Parts of watermarked image slip into non-watermarked image!
+    # Thats why I made distinct file name
     if args.jpeg_ratio is not None:
-        img1.save(f"tmp_{args.jpeg_ratio}_{args.run_name}.jpg", quality=args.jpeg_ratio)
-        img1 = Image.open(f"tmp_{args.jpeg_ratio}_{args.run_name}.jpg")
-        img2.save(f"tmp_{args.jpeg_ratio}_{args.run_name}.jpg", quality=args.jpeg_ratio)
-        img2 = Image.open(f"tmp_{args.jpeg_ratio}_{args.run_name}.jpg")
+        #img1.save(f"tmp_{args.jpeg_ratio}_{args.run_name}.jpg", quality=args.jpeg_ratio)
+        #img1 = Image.open(f"tmp_{args.jpeg_ratio}_{args.run_name}.jpg")
+        #img2.save(f"tmp_{args.jpeg_ratio}_{args.run_name}.jpg", quality=args.jpeg_ratio)
+        #img2 = Image.open(f"tmp_{args.jpeg_ratio}_{args.run_name}.jpg")
+        img1.save(f"tmp1_{args.jpeg_ratio}_{args.run_name}.jpg", quality=args.jpeg_ratio)
+        img1 = Image.open(f"tmp1_{args.jpeg_ratio}_{args.run_name}.jpg")
+        img2.save(f"tmp2_{args.jpeg_ratio}_{args.run_name}.jpg", quality=args.jpeg_ratio)
+        img2 = Image.open(f"tmp2_{args.jpeg_ratio}_{args.run_name}.jpg")
 
     if args.crop_scale is not None and args.crop_ratio is not None:
         set_random_seed(seed)

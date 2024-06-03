@@ -17,6 +17,36 @@ We propose Tree-Ring Watermarking to watermark diffusion model outputs. Tree-Rin
 
 Note: higher diffusers version may not be compatible with the DDIM inversion code.
 
+and-mill: 1st environment (treering) try:
+- conda install pytorch torchvision -c pytorch
+    - because of [W NNPACK.cpp:61] Could not initialize NNPACK! Reason: Unsupported hardware. -> USE_NNPACK=0 python setup.py install (https://discuss.pytorch.org/t/bug-w-nnpack-cpp-80-could-not-initialize-nnpack-reason-unsupported-hardware/107518)
+
+Maybe necessary for running jupyters correctly
+- conda installc nb_conda_kernels
+- python -m ipykernel install --user --name treering --display-name "Python (notebook_env)"
+    - Assuming env is named treering
+
+Try this at the end, because GPU may not be visible:
+- conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
+
+Did this after trying alternative models for inversion
+- pip install --upgrade diffusers transformers
+- pip uninstall diffusers
+- pip install diffusers==0.21.1
+
+and-mill: 2nd environment (treering_1) try:
+run
+- python setup.py build
+- python setup.py install
+- pip install -r requirements.txt
+
+- newer numpies may cause thought wandb: AttributeError: `np.float_` was removed in the NumPy 2.0 release. Use `np.float64` instead.
+- pip install numpy==1.24
+Then do:
+- conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
+
+- pip install IPyhton
+
 ## Usage
 
 ### Perform main experiments and calculate CLIP Score

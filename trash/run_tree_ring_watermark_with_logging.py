@@ -79,6 +79,9 @@ def main(args):
         # generation without watermarking
         set_random_seed(seed)
         init_latents_no_w = pipe.get_random_latents()
+        # and-mill -----------------------------------------------------------------------------------------------------------------
+        save_intermediate_results(init_latents_no_w, index_of_step=1, dirpath='OUT', filenname='{}___init_latents_no_w')
+        # and-mill -----------------------------------------------------------------------------------------------------------------
         outputs_no_w = pipe(
             current_prompt,
             num_images_per_prompt=args.num_images,
@@ -89,6 +92,9 @@ def main(args):
             latents=init_latents_no_w,
             )
         orig_image_no_w = outputs_no_w.images[0]
+        # and-mill -----------------------------------------------------------------------------------------------------------------
+        orig_image_no_w.save("OUT/2___orig_image_no_w.png")
+        # and-mill -----------------------------------------------------------------------------------------------------------------
         
         # generation with watermarking
         if init_latents_no_w is None:
@@ -96,12 +102,24 @@ def main(args):
             init_latents_w = pipe.get_random_latents()
         else:
             init_latents_w = copy.deepcopy(init_latents_no_w)
+        # and-mill -----------------------------------------------------------------------------------------------------------------
+        save_intermediate_results(init_latents_w, index_of_step=3, dirpath='OUT', filenname='{}___init_latents_w_BEFORE_RING')
+        # and-mill -----------------------------------------------------------------------------------------------------------------
 
         # get watermarking mask
         watermarking_mask = get_watermarking_mask(init_latents_w, args, device)
 
         # inject watermark
-        init_latents_w = inject_watermark(init_latents_w, watermarking_mask, gt_patch, args)
+        init_latents_w, init_latens_w_fft = inject_watermark(init_latents_w, watermarking_mask, gt_patch, args,
+                                                             # and-mill -------------------------------------------
+                                                             return_fft=True
+                                                             # and-mill -------------------------------------------
+                                                             )
+        # and-mill -----------------------------------------------------------------------------------------------------------------
+        save_intermediate_results(init_latents_w, index_of_step=4, dirpath='OUT', filenname='{}___init_latents_w_AFTER_RING')
+        #
+        save_intermediate_results(init_latens_w_fft, index_of_step=4, dirpath='OUT', filenname='{}___init_latents_w_AFTER_RING_FFT')
+        # and-mill -----------------------------------------------------------------------------------------------------------------
 
         outputs_w = pipe(
             current_prompt,
@@ -113,13 +131,23 @@ def main(args):
             latents=init_latents_w,
             )
         orig_image_w = outputs_w.images[0]
+        # and-mill -----------------------------------------------------------------------------------------------------------------
+        orig_image_w.save("OUT/5___orig_image_w.png")
+        # and-mill -----------------------------------------------------------------------------------------------------------------
 
         ### test watermark
         # distortion
         orig_image_no_w_auged, orig_image_w_auged = image_distortion(orig_image_no_w, orig_image_w, seed, args)
+        # and-mill -----------------------------------------------------------------------------------------------------------------
+        orig_image_no_w_auged.save("OUT/6___orig_image_no_w_auged.png")
+        orig_image_w_auged.save("OUT/7___orig_image_w_auged.png")
+        # and-mill -----------------------------------------------------------------------------------------------------------------
 
         # reverse img without watermarking
         img_no_w = transform_img(orig_image_no_w_auged).unsqueeze(0).to(text_embeddings.dtype).to(device)
+        # and-mill -----------------------------------------------------------------------------------------------------------------
+        orig_image_no_w_auged.save("OUT/8___img_no_w.png")
+        # and-mill -----------------------------------------------------------------------------------------------------------------
         image_latents_no_w = pipe.get_image_latents(img_no_w, sample=False)
 
         reversed_latents_no_w = pipe.forward_diffusion(
@@ -132,6 +160,9 @@ def main(args):
         # reverse img with watermarking
         img_w = transform_img(orig_image_w_auged).unsqueeze(0).to(text_embeddings.dtype).to(device)
         image_latents_w = pipe.get_image_latents(img_w, sample=False)
+        # and-mill -----------------------------------------------------------------------------------------------------------------
+        save_intermediate_results(image_latents_w, index_of_step=9, dirpath='OUT', filenname='{}___image_latents_w')
+        # and-mill -----------------------------------------------------------------------------------------------------------------
 
         reversed_latents_w = pipe.forward_diffusion(
             latents=image_latents_w,
@@ -139,6 +170,12 @@ def main(args):
             guidance_scale=1,
             num_inference_steps=args.test_num_inference_steps,
         )
+        # and-mill -----------------------------------------------------------------------------------------------------------------
+        save_intermediate_results(reversed_latents_w, index_of_step=10, dirpath='OUT', filenname='{}___reversed_latents_w')
+        # get fft
+        reversed_latents_w_fft = torch.fft.fftshift(torch.fft.fft2(reversed_latents_w), dim=(-1, -2))
+        save_intermediate_results(reversed_latents_w_fft, index_of_step=10, dirpath='OUT', filenname='{}___reversed_latents_w')
+        # and-mill -----------------------------------------------------------------------------------------------------------------
 
         # eval
         no_w_metric, w_metric = eval_watermark(reversed_latents_no_w, reversed_latents_w, watermarking_mask, gt_patch, args)

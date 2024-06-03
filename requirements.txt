@@ -7,6 +7,4 @@ wandb
 ftfy
 datasets
 accelerate
-
-# conda install pytorch torchvision -c pytorch
-# [W NNPACK.cpp:61] Could not initialize NNPACK! Reason: Unsupported hardware. -> USE_NNPACK=0 python setup.py install (https://discuss.pytorch.org/t/bug-w-nnpack-cpp-80-could-not-initialize-nnpack-reason-unsupported-hardware/107518)
+numpy
