@@ -21,6 +21,7 @@ from IPython.display import display
 
 import image_utils
 
+
 # ---------------------------- ARGS ----------------------------
 parser = argparse.ArgumentParser(description='tree-ring_inversion_experiment')
 parser.add_argument('--run_name', default='tree-ring_inversion_experiment')
@@ -63,6 +64,22 @@ args, unknown = parser.parse_known_args()
 
 if args.test_num_inference_steps is None:
     args.test_num_inference_steps = args.num_inference_steps
+    
+#model_id_alt0 = 'stabilityai/stable-diffusion-2-1-base'  # PNDMScheduler
+# model_id_alt0 = 'Kandinski'  # PNDMScheduler
+# model_id_alt0 = 'runwayml/stable-diffusion-v1-5'  # PNDMScheduler
+model_id_alt0 = "hakurei/waifu-diffusion"
+#model_id_alt0 = 'prompthero/openjourney'  # PNDMScheduler, torch_dtype=torch.float16
+# model_id_alt0 = 'Fictiverse/Stable_Diffusion_Microscopic_model'  # PNDMScheduler
+
+args.model_id_alt = model_id_alt0
+
+swap_pipes = True
+if swap_pipes:
+    print("Swapping pipes")
+    otherpipe = args.model_id
+    args.model_id = args.model_id_alt
+    args.model_id_alt = otherpipe
 
 
 # ---------------------------- LOAD Model & Data ----------------------------
@@ -71,7 +88,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print(f'DEVICE={device}')
 
 # original pipe (used for generating images and also inversion)
-print('LOAD PIPE orig')
+print(f'LOAD PIPE orig: {args.model_id}')
 pipe_orig = InversableStableDiffusionPipeline.from_pretrained(
     args.model_id,
     scheduler=DPMSolverMultistepScheduler.from_pretrained(args.model_id, subfolder='scheduler'),
@@ -79,24 +96,21 @@ pipe_orig = InversableStableDiffusionPipeline.from_pretrained(
     torch_dtype=torch.float32,
     #revision='fp16',
     variant='fp16',  # updated after new transformers version
+    safety_checker=None, requires_safety_checker=False,
     )
 pipe_orig = pipe_orig.to(device)
 
 # alternative pipe (used for inversion process only)
-print('LOAD PIPE alt0')
-#model_id_alt0 = 'stabilityai/stable-diffusion-2-1-base'  # PNDMScheduler
-# model_id_alt0 = 'Kandinski'  # PNDMScheduler
-#model_id_alt0 = 'runwayml/stable-diffusion-v1-5'  # PNDMScheduler
-#model_id_alt0 = 'prompthero/openjourney'  # PNDMScheduler, torch_dtype=torch.float16
-model_id_alt0 = 'Fictiverse/Stable_Diffusion_Microscopic_model'  # PNDMScheduler
+print(f'LOAD PIPE alt0: {args.model_id_alt}')
 
 pipe_alt0 = InversableStableDiffusionPipeline.from_pretrained(
-    model_id_alt0,
-    scheduler=DPMSolverMultistepScheduler.from_pretrained(model_id_alt0, subfolder='scheduler'),
+    args.model_id_alt,
+    scheduler=DPMSolverMultistepScheduler.from_pretrained(args.model_id_alt, subfolder='scheduler'),
     #torch_dtype=torch.float16,
     torch_dtype=torch.float32,
     #revision='fp16',
     variant='fp16',  # updated after new transformers version
+    safety_checker=None, requires_safety_checker=False,
     )
 pipe_alt0 = pipe_alt0.to(device)
 
@@ -120,6 +134,8 @@ known_prompt = current_prompt # assume at the detection time, the original promp
 unknown_prompt = '' # assume at the detection time, the original prompt is unknown
 
 seed = args.gen_seed
+
+current_prompt = "masterpiece, best quality, 1girl, green hair, sweater, looking at viewer, upper body, beanie, outdoors, watercolor, night, turtleneck"
 
 
 # ---------------------------- GENERATE WO Watermark ----------------------------
