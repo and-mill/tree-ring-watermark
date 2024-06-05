@@ -88,7 +88,8 @@ print('LOAD PIPE alt0')
 # model_id_alt0 = 'Kandinski'  # PNDMScheduler
 #model_id_alt0 = 'runwayml/stable-diffusion-v1-5'  # PNDMScheduler
 #model_id_alt0 = 'prompthero/openjourney'  # PNDMScheduler, torch_dtype=torch.float16
-model_id_alt0 = 'Fictiverse/Stable_Diffusion_Microscopic_model'  # PNDMScheduler
+#model_id_alt0 = 'Fictiverse/Stable_Diffusion_Microscopic_model'  # PNDMScheduler
+model_id_alt0 = 'dalle-mini/dalle-mega'  # PNDMScheduler
 
 pipe_alt0 = InversableStableDiffusionPipeline.from_pretrained(
     model_id_alt0,
