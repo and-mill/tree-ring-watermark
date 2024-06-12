@@ -29,6 +29,13 @@ parser.add_argument('--start', default=0, type=int)
 parser.add_argument('--end', default=1, type=int)
 parser.add_argument('--image_length', default=512, type=int)
 parser.add_argument('--model_id', default='stabilityai/stable-diffusion-2-1-base')  # PNDMScheduler
+parser.add_argument('--model_id_extract', default='runwayml/stable-diffusion-v1-5')  # PNDMScheduler
+#model_id_alt0 = 'stabilityai/stable-diffusion-2-1-base'  # PNDMScheduler
+#model_id_alt0 = 'Kandinski'  # PNDMScheduler
+#model_id_alt0 = 'runwayml/stable-diffusion-v1-5'  # PNDMScheduler
+#model_id_alt0 = 'prompthero/openjourney'  # PNDMScheduler, torch_dtype=torch.float16
+#model_id_alt0 = 'Fictiverse/Stable_Diffusion_Microscopic_model'  # PNDMScheduler
+#model_id_alt0 = 'dalle-mini/dalle-mega'  # PNDMScheduler
 parser.add_argument('--with_tracking', action='store_false', default=True)
 parser.add_argument('--num_images', default=1, type=int)
 parser.add_argument('--guidance_scale', default=7.5, type=float)
@@ -84,12 +91,7 @@ pipe_orig = pipe_orig.to(device)
 
 # alternative pipe (used for inversion process only)
 print('LOAD PIPE alt0')
-#model_id_alt0 = 'stabilityai/stable-diffusion-2-1-base'  # PNDMScheduler
-# model_id_alt0 = 'Kandinski'  # PNDMScheduler
-#model_id_alt0 = 'runwayml/stable-diffusion-v1-5'  # PNDMScheduler
-#model_id_alt0 = 'prompthero/openjourney'  # PNDMScheduler, torch_dtype=torch.float16
-model_id_alt0 = 'Fictiverse/Stable_Diffusion_Microscopic_model'  # PNDMScheduler
-#model_id_alt0 = 'dalle-mini/dalle-mega'  # PNDMScheduler
+model_id_alt0 = args.model_id_extract
 
 pipe_alt0 = InversableStableDiffusionPipeline.from_pretrained(
     model_id_alt0,
