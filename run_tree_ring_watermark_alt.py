@@ -51,9 +51,9 @@ def main(args):
         )
     pipe = pipe.to(device)
     
-    altscheduler = DPMSolverMultistepScheduler.from_pretrained(args.alt_model_id, subfolder='scheduler')
+    altscheduler = DPMSolverMultistepScheduler.from_pretrained(args.model_id_alt, subfolder='scheduler')
     altpipe = InversableStableDiffusionPipeline.from_pretrained(
-        args.alt_model_id,
+        args.model_id_alt,
         scheduler=altscheduler,
         #torch_dtype=torch.float16,
         torch_dtype=torch.float32,
@@ -250,12 +250,12 @@ if __name__ == '__main__':
     parser.add_argument('--run_name', default='test')
     parser.add_argument('--dataset', default='Gustavosta/Stable-Diffusion-Prompts')
     parser.add_argument('--start', default=0, type=int)
-    parser.add_argument('--end', default=2, type=int)
+    parser.add_argument('--end', default=1, type=int)
     parser.add_argument('--image_length', default=512, type=int)
     # parser.add_argument('--model_id', default='hakurei/waifu-diffusion')
     parser.add_argument('--model_id', default='stabilityai/stable-diffusion-2-1-base')
-    # parser.add_argument('--alt_model_id', default='hakurei/waifu-diffusion')
-    parser.add_argument('--alt_model_id', default='runwayml/stable-diffusion-v1-5')
+    # parser.add_argument('--model_id_alt', default='hakurei/waifu-diffusion')
+    parser.add_argument('--model_id_alt', default='runwayml/stable-diffusion-v1-5')
     parser.add_argument('--with_tracking', default=True, action='store_true')
     parser.add_argument('--num_images', default=1, type=int)
     parser.add_argument('--guidance_scale', default=7.5, type=float)
