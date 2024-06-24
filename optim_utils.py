@@ -204,16 +204,25 @@ def inject_watermark(init_latents_w, watermarking_mask, gt_patch, args,
                      return_fft=False
                      # and-mill ------------------------------------------------------------------------------
                      ):
+
+    # and-mill ------------------------------------------------------------------------------
+    # This necessary if we choose float pipeline in the beginning - Their random latents will be floar 16 too.
+    # This will be problematic once we do FFT: FFT of float 16 is complex 32. We need it to be complex 64 though
+    # because gt_patch is complex 64.
+    init_latents_w = copy.deepcopy(init_latents_w).float()
+    # and-mill ------------------------------------------------------------------------------
+
     init_latents_w_fft = torch.fft.fftshift(torch.fft.fft2(init_latents_w), dim=(-1, -2))
+
     if args.w_injection == 'complex':
         init_latents_w_fft[watermarking_mask] = gt_patch[watermarking_mask].clone()
+        init_latents_w = torch.fft.ifft2(torch.fft.ifftshift(init_latents_w_fft, dim=(-1, -2)))
+        #print("Max imaginary part:", init_latents_w.imag.abs().max().item())
+        init_latents_w = init_latents_w.real
     elif args.w_injection == 'seed':
         init_latents_w[watermarking_mask] = gt_patch[watermarking_mask].clone()
-        return init_latents_w
     else:
         NotImplementedError(f'w_injection: {args.w_injection}')
-
-    init_latents_w = torch.fft.ifft2(torch.fft.ifftshift(init_latents_w_fft, dim=(-1, -2))).real
 
     if return_fft:
         return init_latents_w, init_latents_w_fft
